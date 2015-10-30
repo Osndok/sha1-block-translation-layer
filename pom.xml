@@ -8,7 +8,7 @@
 	<version>snapshot</version>
 	<packaging>jar</packaging>
 
-	<name>sha1-block-transition-layer</name>
+	<name>sha1-block-translation-layer</name>
 	<url>https://github.com/Osndok/sha1btl</url>
 
 	<description>
