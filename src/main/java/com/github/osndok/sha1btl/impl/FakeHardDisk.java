@@ -1,5 +1,6 @@
 package com.github.osndok.sha1btl.impl;
 
+import com.github.osndok.sha1btl.FrequentAccessOptimizationMode;
 import com.github.osndok.sha1btl.IntegerAddressedBlockDevice;
 
 import java.io.IOException;
@@ -55,23 +56,21 @@ class FakeHardDisk implements IntegerAddressedBlockDevice
 	}
 
 	public
-	void discardBlock(int i) throws IOException
+	int getErasureRegionSizeInBlocks()
 	{
-		//Yea.. we could *actually* remove it, but that wouldn't be 'hard-drive like', and... we might catch
-		//'block leaks' this way.
-		//dont: storage.remove(i);
-	}
-
-	public
-	Integer getErasureRegionSizeInBlocks()
-	{
-		return null;
+		return 1;
 	}
 
 	public
 	void eraseRegion(int j, int startingBlock, int endingBlock) throws IllegalArgumentException
 	{
-		throw new UnsupportedOperationException();
+		if (j!=startingBlock || j!=endingBlock)
+		{
+			final
+			String message=String.format("hard disk erasure size is 1 block, so eraseRegion(%d,%d,%d) does not make sense.", j, startingBlock, endingBlock);
+
+			throw new IllegalArgumentException(message);
+		}
 	}
 
 	public
@@ -86,4 +85,21 @@ class FakeHardDisk implements IntegerAddressedBlockDevice
 		return numBlocks;
 	}
 
+	public
+	FrequentAccessOptimizationMode getFrequentAccessOptimizationMode()
+	{
+		return FrequentAccessOptimizationMode.CENTRALIZED;
+	}
+
+	public
+	int getEstimatedWriteFatigue()
+	{
+		return Anecdotal.MAGNETIC_WRITE_FATIGUE;
+	}
+
+	public
+	long getBitRotRefreshPeriod()
+	{
+		return Anecdotal.HARD_DISK_LIFE_EXPECTANCY;
+	}
 }

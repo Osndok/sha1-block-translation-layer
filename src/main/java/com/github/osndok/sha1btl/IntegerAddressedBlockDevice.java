@@ -38,27 +38,41 @@ interface IntegerAddressedBlockDevice extends AbstractBlockDevice
 	void writeBlock(int i, byte[] input) throws IOException;
 
 	/**
-	 * For some block devices, like SSDs, we may want to issue a discard() command to indicate the block will not be read
-	 * again. However, some sources indicate that overuse of discard() could be *VERY* damaging to SSDs, so... maybe not?
-	 * If the underlying block device does not have (or need) this extra information, then it should amount to a no-op
-	 * (rather than throwing an UnsupportedOperationException).
-	 *
-	 * @param i - the block number that shall never be read from again... until it is written.
-	 * @throws IOException - the block could not be discarded.
+	 * For non-solid-state media (like hard disks, CDs, and Blu-ray disks... but probably even tape-drives,
+	 * warehouse robots and other fun and cooky experiments), it is often the case that having frequently
+	 * accessed blocks stored (or more literally read) closer towards the *center* of the available address
+	 * space (as opposed to the near-zero and near-max edges). To my understanding, SSDs and MTDs do not
+	 * exhibit this effect, and would actually have a slight benefit from the data being "spread out" or
+	 * "clumped in the front" depending on what your concern is.
 	 */
-	void discardBlock(int i) throws IOException;
+	FrequentAccessOptimizationMode getFrequentAccessOptimizationMode();
 
 	/**
-	 * In case we venture into the MTD/FTL space, where we must do something akin to wear-leveling
-	 * and erasing blocks at a time, this will return the size (in blocks) of the region that must be
-	 * erased at the same time.
-	 *
-	 * @return null if this device does not support/require multi-block erasures, otherwise returns the number of blocks that must be zeroed at once
+	 * @return the number of times that a block (or erasure region) can be written (or erased) before it is likely to result in an unusable block.
 	 */
-	Integer getErasureRegionSizeInBlocks();
+	int getEstimatedWriteFatigue();
 
 	/**
-	 * For the MTD/FTL experiments, this is the equivalent to issuing the erase-block/region command.
+	 * @url https://en.wikipedia.org/wiki/Data_degradation
+	 * @return the estimated time (in milliseconds) that data stored on this device will last (e.g. "shelf life") before a refresh is required.
+	 */
+	long getBitRotRefreshPeriod();
+
+	/**
+	 * Since we have some interest in venturing into the crazy world of MTD devices, where the minimum erasable region
+	 * is VERY BIG compared to the minimum writable block/page... we might as well impose the same logic onto all
+	 * subordinate block devices. Then, conventional block devices become the "special case", where they can erase
+	 * one block at a time. In a larger, more generalized sense, this same idea might be mappable onto "Storage Pods"
+	 * if (after so many disk failures) one desires to migrate all the data off of a pod for servicing.
+	 *
+	 * @return the number of blocks that must be erased at the same time (1 for conventional block devices)
+	 */
+	int getErasureRegionSizeInBlocks();
+
+	/**
+	 * This is expressed in terms for the MTD experiments, but this method covers both he erase-block/region command
+	 * AND the SSD discard() command. For SSDs (and single-block erasable partitions in general), all the arguments
+	 * should mathematically come out to be the same integer values.
 	 *
 	 * @param j - the region number, starting from zero
 	 * @param startingBlock - to be doubly sure, this is what the program 'thinks' is the first block being erased

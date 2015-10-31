@@ -1,5 +1,6 @@
 package com.github.osndok.sha1btl.impl;
 
+import com.github.osndok.sha1btl.FrequentAccessOptimizationMode;
 import com.github.osndok.sha1btl.IntegerAddressedBlockDevice;
 
 import java.io.IOException;
@@ -8,13 +9,20 @@ import java.util.Map;
 
 /**
  * This simulates my understanding of how directly using flash storage should work.
+ * MTD stands for "Memory Technology Device". There might be a bit of semantic
+ * mismatch, though, as we refer to the smallest readable/writable unit as a 'block'
+ * and they, seemingly, call it a subpage (as they encourage writing a whole erasure
+ * block at the same time).
  *
  * TODO: maybe we should track/report "wear", or simulate "wear-related failure"?
  *
  * Created by robert on 2015-10-30 14:55.
+ *
+ * @url https://lwn.net/Articles/428584/
+ * @url http://www.linux-mtd.infradead.org/
  */
 public
-class FakeFTL implements IntegerAddressedBlockDevice
+class FakeMTD implements IntegerAddressedBlockDevice
 {
 	private final
 	int blockSize;
@@ -29,7 +37,7 @@ class FakeFTL implements IntegerAddressedBlockDevice
 	Map<Integer, Region> regionMap = new HashMap<Integer, Region>();
 
 	public
-	FakeFTL(int blockSize, int numBlocks, int blocksPerErasureRegion)
+	FakeMTD(int blockSize, int numBlocks, int blocksPerErasureRegion)
 	{
 		this.blockSize = blockSize;
 		this.numBlocks = numBlocks;
@@ -66,13 +74,19 @@ class FakeFTL implements IntegerAddressedBlockDevice
 	}
 
 	public
-	void discardBlock(int i) throws IOException
+	FrequentAccessOptimizationMode getFrequentAccessOptimizationMode()
 	{
-		throw new UnsupportedOperationException();
+		return FrequentAccessOptimizationMode.DIFFUSE;
 	}
 
 	public
-	Integer getErasureRegionSizeInBlocks()
+	int getEstimatedWriteFatigue()
+	{
+		return Anecdotal.FLASH_WRITE_FATIGUE;
+	}
+
+	public
+	int getErasureRegionSizeInBlocks()
 	{
 		return blocksPerErasureRegion;
 	}
@@ -180,5 +194,11 @@ class FakeFTL implements IntegerAddressedBlockDevice
 				throw new AssertionError("block comes after region's endingBlock: "+endingBlock+" < "+i);
 			}
 		}
+	}
+
+	public
+	long getBitRotRefreshPeriod()
+	{
+		return Anecdotal.FLASH_CELL_POWERED_LIFE_EXPECTANCY;
 	}
 }

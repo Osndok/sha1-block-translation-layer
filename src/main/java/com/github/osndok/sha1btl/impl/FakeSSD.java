@@ -1,10 +1,6 @@
 package com.github.osndok.sha1btl.impl;
 
-import com.github.osndok.sha1btl.IntegerAddressedBlockDevice;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import com.github.osndok.sha1btl.FrequentAccessOptimizationMode;
 
 /**
  * Created by robert on 2015-10-30 14:52.
@@ -20,8 +16,22 @@ class FakeSSD extends FakeHardDisk
 
 	@Override
 	public
-	void discardBlock(int i) throws IOException
+	int getEstimatedWriteFatigue()
 	{
-		storage.remove(i);
+		return Anecdotal.FLASH_WRITE_FATIGUE;
+	}
+
+	@Override
+	public
+	long getBitRotRefreshPeriod()
+	{
+		return Anecdotal.FLASH_CELL_POWERED_LIFE_EXPECTANCY;
+	}
+
+	@Override
+	public
+	FrequentAccessOptimizationMode getFrequentAccessOptimizationMode()
+	{
+		return FrequentAccessOptimizationMode.DIFFUSE;
 	}
 }
