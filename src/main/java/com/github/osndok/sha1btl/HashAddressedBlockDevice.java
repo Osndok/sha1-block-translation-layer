@@ -28,12 +28,12 @@ interface HashAddressedBlockDevice extends AbstractBlockDevice
 	HashDeviceStats getRecursiveStatistics();
 
 	/**
-	 * @param hashAddress - the previously-returned (or reconstructed) hash code returned by writeBlock()
+	 * @param sha1HashAddress - the previously-returned (or reconstructed) hash code returned by writeBlock()
 	 * @param buffer - a place to store the data, must be blockSize long
 	 * @throws IOException - if the data could not be read, in which case the output buffer might still contain useful data
 	 * @sideeffect access times are updated, and the given block is less likely to be pushed into lower ranks.
 	 */
-	void readBlock(HashAddress hashAddress, byte[] buffer) throws IOException;
+	void readBlock(Sha1HashAddress sha1HashAddress, byte[] buffer) throws IOException;
 
 	/**
 	 * @param buffer - the incoming data you would like to store, must be blockSize long
@@ -41,32 +41,32 @@ interface HashAddressedBlockDevice extends AbstractBlockDevice
 	 * @throws IOException if the data could not be written
 	 * @sideeffect reference counter to the block is incremented, making the data 'less likely' to go away.
 	 */
-	HashAddress writeBlock(byte[] buffer) throws IOException, HashCollision;
+	Sha1HashAddress writeBlock(byte[] buffer) throws IOException, HashCollision;
 
 	/**
-	 * @param hashAddress - the block on which we wish to get information
+	 * @param sha1HashAddress - the block on which we wish to get information
 	 * @return meta information concerning the block (when inserted, accessed, etc), or null indicating the block could not be found
 	 * @throws IOException - because i/o is never 100% reliable
 	 */
-	HashBlockStats statBlock(HashAddress hashAddress) throws IOException;
+	HashBlockStats statBlock(Sha1HashAddress sha1HashAddress) throws IOException;
 
 	/**
 	 * Indicates to the subsystem that the given reference is now substantially less likely to be referenced, and that
 	 * it might be a good candidate for demotion into a slower (sub-layer) storage medium.
 	 *
-	 * @param hashAddress the address of the block that is unlikely to be referenced again
+	 * @param sha1HashAddress the address of the block that is unlikely to be referenced again
 	 */
-	void demoteBlock(HashAddress hashAddress) throws IOException;
+	void demoteBlock(Sha1HashAddress sha1HashAddress) throws IOException;
 
 	/**
 	 * Indicates to the subsystem that the reference to the given block will be discarded immediately after the call.
 	 *
-	 * @param hashAddress the address of the block that is going away
+	 * @param sha1HashAddress the address of the block that is going away
 	 * @throws IOException could not correctly unlink the block
 	 * @sideeffect the reference counter is decremented, if it reaches zero it becomes a candidate for garbage collection
 	 * @throws AssertionError if reference counter tries to move below zero
 	 */
-	void unlinkBlock(HashAddress hashAddress) throws IOException;
+	void unlinkBlock(Sha1HashAddress sha1HashAddress) throws IOException;
 
 	/**
 	 * Causes the current thread to stall until such a time that all I/O operations that pending as of the start
