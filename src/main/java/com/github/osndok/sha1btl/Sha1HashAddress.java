@@ -26,6 +26,26 @@ class Sha1HashAddress
 		return bytes;
 	}
 
+	/**
+	 * Used for the BloomFilter. Using the least-significate-byte because we are sorting by the
+	 * most-significant byte.
+	 */
+	public
+	byte getLSB()
+	{
+		return bytes[19];
+	}
+
+	/**
+	 * Used for the BloomFilter. Using the least-significate-byte because we are sorting by the
+	 * most-significant byte.
+	 */
+	public
+	byte getNearlyLSB()
+	{
+		return bytes[18];
+	}
+
 	private transient
 	int hashCode;
 
