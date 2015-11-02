@@ -42,7 +42,7 @@ class Sha1BloomFilterTest
 	void testTwoUsefulBitsSet() throws Exception
 	{
 		final
-		Sha1HashAddress key=new Sha1HashAddress(Hex.decodeHex("aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d".toCharArray()));
+		Sha1HashAddress key=new Sha1HashAddress(Example.SHA1_HASH_CODE);
 
 		final
 		Sha1BloomFilter bloomFilter=new Sha1BloomFilter();

@@ -1,5 +1,7 @@
 package com.github.osndok.sha1btl;
 
+import java.util.Arrays;
+
 /**
  * Used primarily for type-safety (e.g. to avoid passing two nameless byte-arrays to our store method),
  * but also lets us consolidate a bit of address-specific logic. In the abstract sense, a hash code is
@@ -7,7 +9,7 @@ package com.github.osndok.sha1btl;
  *
  * Created by robert on 2015-10-30 14:08.
  */
-public
+public final
 class Sha1HashAddress
 {
 	private final
@@ -88,5 +90,25 @@ class Sha1HashAddress
 	int integerFrom(byte a, byte b, byte c, byte d)
 	{
 		return ((int)a)<<24 | ((int)b)<<16 | ((int)c)<<8 | d;
+	}
+
+	@Override
+	public
+	boolean equals(Object o)
+	{
+		if (this == o)
+		{
+			return true;
+		}
+
+		if (o == null || getClass() != o.getClass())
+		{
+			return false;
+		}
+
+		final
+		Sha1HashAddress that = (Sha1HashAddress) o;
+
+		return Arrays.equals(bytes, that.bytes);
 	}
 }

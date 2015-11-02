@@ -76,4 +76,19 @@ class Sha1HashAddressTest
 	{
 		return Sha1HashAddress.integerFrom((byte)i, (byte)i1, (byte)i2, (byte)i3);
 	}
+
+	@Test
+	public
+	void testEquals() throws Exception
+	{
+		final
+		Sha1HashAddress a = new Sha1HashAddress(Example.SHA1_HASH_CODE);
+
+		final
+		Sha1HashAddress b = new Sha1HashAddress(Example.SHA1_HASH_CODE);
+
+		assertFalse(a==b);
+		assertTrue(a.equals(b));
+		assertTrue(b.equals(a));
+	}
 }
